@@ -7,35 +7,35 @@
         android:id="@+id/name"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Name" />
+        android:text="@string/name" />
 
     <EditText
         android:id="@+id/enterName"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:ems="10"
-        android:hint="Name"
+        android:hint="@string/name"
         android:inputType="textPersonName" />
 
     <TextView
         android:id="@+id/login"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="login" />
+        android:text="@string/login" />
 
     <EditText
         android:id="@+id/enterLogin"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:ems="10"
-        android:hint="Login"
+        android:hint="@string/login"
         android:inputType="textPersonName" />
 
     <TextView
         android:id="@+id/password"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Password" />
+        android:text="@string/password" />
 
     <EditText
         android:id="@+id/enterPassword"
@@ -48,7 +48,7 @@
         android:id="@+id/confirmPassword"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Confirm password" />
+        android:text="@string/confirm_password" />
 
     <EditText
         android:id="@+id/reenterPassword"
@@ -61,7 +61,7 @@
         android:id="@+id/email"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="E-mail" />
+        android:text="@string/email" />
 
     <EditText
         android:id="@+id/enterEmail"
@@ -74,11 +74,11 @@
         android:id="@+id/confirmRegistration"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Confirm" />
+        android:text="@string/confirm" />
 
     <Button
         android:id="@+id/haveAccount"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Have account yet" />
+        android:text="@string/have_account_yet" />
 </LinearLayout>

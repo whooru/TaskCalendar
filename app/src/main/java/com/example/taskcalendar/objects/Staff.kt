@@ -1,4 +1,4 @@
 package com.example.taskcalendar.objects
 
-class Staff {
+class Staff(val name: String) {
 }

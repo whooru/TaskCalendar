@@ -2,6 +2,7 @@ package com.example.taskcalendar.veiwsstate
 
 import android.app.Activity
 import android.content.Intent
+import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TableLayout
 import android.widget.TableRow
@@ -14,22 +15,24 @@ import java.io.Serializable
 
 class MainViewState : State {
     override fun updateState(activity: Activity, user: User) {
+        //make user's calendars
         val textView = TextView(activity)
-        activity.clayout.addView(textView)
         val calendarList = ConstraintLayout(activity)
         val tableLayout = TableLayout(activity)
-        tableLayout.layoutParams = Parametres().getTableParams()
         var tableRow = TableRow(activity)
+        activity.clayout.addView(textView)
+        tableLayout.layoutParams = Parametres().getTableParams() as ViewGroup.LayoutParams?
         tableRow.layoutParams = Parametres().getTableParams()
         calendarList.addView(tableLayout)
         tableLayout.addView(tableRow)
+
         var i = 0
         for (calendar in user.calendarsMap.keys) {
             if (i < 2) {
                 val calendarBtn = Button(activity)
                 calendarBtn.text = calendar
                 calendarBtn.layoutParams = Parametres().getDayParams()
-                calendarBtn.setOnClickListener {
+                calendarBtn.setOnClickListener {                               //open calendar
                     val intent: Intent = Intent(activity, CalendarActivity::class.java).apply {
                         putExtra("user", user as Serializable)
                         putExtra("calendar", calendar)

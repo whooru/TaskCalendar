@@ -1,13 +1,9 @@
 package com.example.taskcalendar.veiwsstate
 
 import android.app.Activity
-import android.view.View
-import android.view.ViewGroup
 import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.TableRow
-import com.example.taskcalendar.R
-import com.example.taskcalendar.objects.CDay
 import com.example.taskcalendar.objects.CMonth
 import com.example.taskcalendar.objects.User
 import com.example.taskcalendar.objects.Year
@@ -15,23 +11,12 @@ import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.android.synthetic.main.activity_calendar.*
 import kotlinx.android.synthetic.main.activity_calendar.view.*
 import org.threeten.bp.LocalDateTime
-import org.threeten.bp.Month
-import java.lang.Exception
-import java.lang.NullPointerException
 
 class CalendarViewState(val activity: Activity, val user: User) : State {
     override fun updateState(activity: Activity, user: User) {
 
     }
 
-    fun makeMonth(calendarName: String) {
-        val todayData = LocalDateTime.now()
-        val todayYear = todayData.year
-        val todayMonth = todayData.month.toString()
-        val todayDay: Map<Int, String> =
-            mapOf(todayData.dayOfYear to todayData.dayOfWeek.toString())
-        activity.month.text = todayMonth
-    }
 
     fun showMonth(selectedMonth: String, calendarName: String, selectedYear: String) {
         val todayData = LocalDateTime.now()
@@ -41,7 +26,7 @@ class CalendarViewState(val activity: Activity, val user: User) : State {
         var currentMonth =
             user.calendarsList[calendarName]?.yearsList?.get(selectedYear)
                 ?.monthsList?.get(
-                selectedMonth!!
+                selectedMonth
             )
         println("it's Ok")
         if (currentMonth == null) {
@@ -54,7 +39,7 @@ class CalendarViewState(val activity: Activity, val user: User) : State {
             currentMonth =
                 user.calendarsList[calendarName]?.yearsList?.get(selectedYear)
                     ?.monthsList?.get(
-                    selectedMonth!!
+                    selectedMonth
                 )
         }
         val firstDayOfMonth =
@@ -83,7 +68,7 @@ class CalendarViewState(val activity: Activity, val user: User) : State {
                             usedLength
                         ).dayOfYear.toString()
                     )!!.id!!
-                    if (LocalDateTime.now().dayOfYear == day.id){
+                    if (LocalDateTime.now().dayOfYear == day.id) {
                         day.setBackgroundColor(123)
                     }
                     day.layoutParams = Parametres().getDayParams()
@@ -152,7 +137,7 @@ class CalendarViewState(val activity: Activity, val user: User) : State {
                 if (i == iter) {
                     day.setBackgroundColor(532)
                 }
-                if (dbDay.id == LocalDateTime.now().dayOfYear){
+                if (dbDay.id == LocalDateTime.now().dayOfYear) {
                     day.setBackgroundColor(123)
                 }
                 weekTb.weekDays.addView(day)

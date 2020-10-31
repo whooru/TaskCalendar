@@ -7,21 +7,22 @@
         android:id="@+id/textView2"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Login" />
+        android:text="@string/email" />
 
     <EditText
         android:id="@+id/LEmail"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:ems="10"
-        android:hint="Login"
-        android:inputType="textPersonName" />
+        android:hint="@string/login"
+        android:inputType="textEmailAddress" />
+
 
     <TextView
         android:id="@+id/textView3"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Password" />
+        android:text="@string/password" />
 
     <EditText
         android:id="@+id/LPassword"
@@ -34,11 +35,11 @@
         android:id="@+id/LConfirm"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Login" />
+        android:text="@string/login" />
 
     <Button
         android:id="@+id/LRegBtn"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Registration" />
+        android:text="@string/registration" />
 </LinearLayout>
