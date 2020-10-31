@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <TextView
+        android:id="@+id/name"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Name" />
+
+    <EditText
+        android:id="@+id/enterName"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:hint="Name"
+        android:inputType="textPersonName" />
+
+    <TextView
+        android:id="@+id/login"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="login" />
+
+    <EditText
+        android:id="@+id/enterLogin"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:hint="Login"
+        android:inputType="textPersonName" />
+
+    <TextView
+        android:id="@+id/password"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Password" />
+
+    <EditText
+        android:id="@+id/enterPassword"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:inputType="textPassword" />
+
+    <TextView
+        android:id="@+id/confirmPassword"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Confirm password" />
+
+    <EditText
+        android:id="@+id/reenterPassword"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:inputType="textPassword" />
+
+    <TextView
+        android:id="@+id/email"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="E-mail" />
+
+    <EditText
+        android:id="@+id/enterEmail"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:inputType="textEmailAddress" />
+
+    <Button
+        android:id="@+id/confirmRegistration"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Confirm" />
+
+    <Button
+        android:id="@+id/haveAccount"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Have account yet" />
+</LinearLayout>
