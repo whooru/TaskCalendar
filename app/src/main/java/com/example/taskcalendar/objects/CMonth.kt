@@ -16,10 +16,12 @@ data class CMonth(val numberOfMonth: Int? = null, val name: String = "", val mon
             val day = CDay(
                 month.withDayOfMonth(i).dayOfYear,
                 month.withDayOfMonth(i).dayOfMonth,
-                month.withDayOfMonth(i).dayOfWeek.toString()
+                month.withDayOfMonth(i).dayOfWeek.toString(),
+                path.collection("days").document(month.withDayOfMonth(i).dayOfMonth.toString()).path
             )
             daysList[day.id!!.toString()] = day
             val dayPath = path.collection("days").document(day.numberOfDay.toString())
+
             dayPath.set(day)
         }
     }

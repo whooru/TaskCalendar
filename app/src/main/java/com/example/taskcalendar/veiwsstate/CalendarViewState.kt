@@ -1,24 +1,40 @@
 package com.example.taskcalendar.veiwsstate
 
+import android.annotation.SuppressLint
 import android.app.Activity
-import android.widget.Button
-import android.widget.LinearLayout
-import android.widget.TableRow
-import com.example.taskcalendar.objects.CMonth
-import com.example.taskcalendar.objects.User
-import com.example.taskcalendar.objects.Year
+import android.content.ContentValues.TAG
+import android.graphics.Color
+import android.util.Log
+import android.widget.*
+import com.example.taskcalendar.objects.*
+import com.google.android.gms.tasks.Tasks
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.DocumentChange
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.ListenerRegistration
+import com.google.firebase.firestore.QuerySnapshot
+import com.google.firebase.firestore.core.Query
 import kotlinx.android.synthetic.main.activity_calendar.*
 import kotlinx.android.synthetic.main.activity_calendar.view.*
+import kotlinx.android.synthetic.main.activity_registration.view.*
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import org.threeten.bp.LocalDateTime
 
-class CalendarViewState(val activity: Activity, val user: User) : State {
+class CalendarViewState(val activity: Activity, var user: User) : State {
+    lateinit var calendar: String
+    lateinit var year: String
+    lateinit var month: String
     override fun updateState(activity: Activity, user: User) {
 
     }
 
 
     fun showMonth(selectedMonth: String, calendarName: String, selectedYear: String) {
+        calendar = calendarName
+        year = selectedYear
+        month = selectedMonth
         val todayData = LocalDateTime.now()
         activity.month.text = selectedMonth
         activity.thisMonth.removeAllViews()
@@ -26,8 +42,8 @@ class CalendarViewState(val activity: Activity, val user: User) : State {
         var currentMonth =
             user.calendarsList[calendarName]?.yearsList?.get(selectedYear)
                 ?.monthsList?.get(
-                selectedMonth
-            )
+                    selectedMonth
+                )
         println("it's Ok")
         if (currentMonth == null) {
             println("Not ok")
@@ -39,13 +55,15 @@ class CalendarViewState(val activity: Activity, val user: User) : State {
             currentMonth =
                 user.calendarsList[calendarName]?.yearsList?.get(selectedYear)
                     ?.monthsList?.get(
-                    selectedMonth
-                )
+                        selectedMonth
+                    )
         }
         val firstDayOfMonth =
-            todayData.withMonth(currentMonth!!.numberOfMonth!!).withDayOfMonth(1).dayOfWeek.value - 1
+            todayData.withMonth(currentMonth!!.numberOfMonth!!)
+                .withDayOfMonth(1).dayOfWeek.value - 1
         val lastDayOfMonth =
-            todayData.withMonth(currentMonth.numberOfMonth!!).withDayOfMonth(currentMonth.monthSize!!).dayOfWeek.value - 1
+            todayData.withMonth(currentMonth.numberOfMonth!!)
+                .withDayOfMonth(currentMonth.monthSize!!).dayOfWeek.value - 1
         var week = TableRow(activity)
         week.layoutParams = Parametres().getTableParams()
         activity.thisMonth.addView(week)
@@ -73,7 +91,7 @@ class CalendarViewState(val activity: Activity, val user: User) : State {
                     }
                     day.layoutParams = Parametres().getDayParams()
                     day.setOnClickListener {
-                        showWeek(activity, currentMonth, day.id, user, calendarName)
+                        showWeek(activity, currentMonth, day.id)
                     }
                     week.addView(day)
                 }
@@ -109,13 +127,13 @@ class CalendarViewState(val activity: Activity, val user: User) : State {
     fun showWeek(
         activity: Activity,
         currentMonth: CMonth,
-        currentDay: Int,
-        user: User,
-        calendarName: String
+        currentDay: Int
     ) {
         activity.weekFrame.weekDays.removeAllViews()
         val weekTb = activity.weekFrame.weekTb
-        changeWindow(activity)
+        if ((activity.calendarFrame.layoutParams as LinearLayout.LayoutParams).weight == 1f) {
+            changeWindow(activity)
+        }
         var dbDay = currentMonth.daysList[currentDay.toString()]!!
         var iter = 1
         //monday, tuesday wednesday thursday friday saturday sunday
@@ -128,17 +146,23 @@ class CalendarViewState(val activity: Activity, val user: User) : State {
             "SATURDAY" -> iter = 6
             "SUNDAY" -> iter = 7
         }
+        var snapshot: ListenerRegistration? = null
         for (i in 1..7) {
             val day = Button(activity)
             try {
                 dbDay = currentMonth.daysList[(currentDay - iter + i).toString()]!!
+                day.id = dbDay.id!!.toInt()
                 day.text = dbDay.numberOfDay.toString()
                 day.layoutParams = Parametres().getDayParams()
                 if (i == iter) {
                     day.setBackgroundColor(532)
-                }
-                if (dbDay.id == LocalDateTime.now().dayOfYear) {
-                    day.setBackgroundColor(123)
+                }else{
+                    day.setOnClickListener {
+                        showWeek(activity, currentMonth, day.id)
+                        if(snapshot!=null) {
+                            snapshot?.remove()
+                        }
+                    }
                 }
                 weekTb.weekDays.addView(day)
             } catch (e: KotlinNullPointerException) {
@@ -147,8 +171,94 @@ class CalendarViewState(val activity: Activity, val user: User) : State {
             }
         }
         val selectedDay = currentMonth.daysList[(currentDay).toString()]!!
+        snapshot = updateWeek(selectedDay)
+        activity.addStuff.setOnClickListener {
+            addStaff(selectedDay, currentMonth)
+        }
+    }
 
-        activity.staffList
+    private fun cancelAddStaff(selectedDay: CDay, selectedMonth: CMonth) {
+        activity.addStuff.setOnClickListener {
+            activity.staffList.removeView(activity.staffList.getChildAt(activity.staffList.childCount - 1))
+            activity.addStuff.text = "+"
+            activity.addStuff.setOnClickListener {
+                addStaff(selectedDay, selectedMonth)
+            }
+        }
+    }
+
+    private fun addStaff(selectedDay: CDay, selectedMonth: CMonth) {
+        activity.addStuff.text = "-"
+        val newStaff = LinearLayout(activity)
+        val enterStaff = EditText(activity)
+        val confirmBtn = Button(activity)
+        newStaff.setHorizontalGravity(1)
+        activity.staffList.addView(newStaff)
+        newStaff.addView(enterStaff)
+//        activity.scrollStaff.maxScrollAmount
+        newStaff.addView(confirmBtn)
+        cancelAddStaff(selectedDay, selectedMonth)
+        confirmBtn.setOnClickListener {
+            if (enterStaff.text.isNotEmpty()) {
+                val day = selectedMonth.daysList[selectedDay.id.toString()]!!
+                day.addStaff(Staff(enterStaff.text.toString()))
+                activity.addStuff.performClick()
+            } else {
+                val toast = Toast.makeText(activity, "Enter Name!", Toast.LENGTH_LONG)
+                toast.show()
+            }
+        }
+    }
+
+    @SuppressLint("SetTextI18n")
+    private fun updateWeek(selectedDay: CDay) :ListenerRegistration{
+        activity.staffList.removeAllViews()
+        val staffPath =
+            FirebaseFirestore.getInstance().document(selectedDay.path).collection("staff")
+        val snapshot = staffPath
+            .addSnapshotListener { snapshots, e ->
+                if (e != null) {
+                    Log.w(TAG, "listen:error", e)
+                    return@addSnapshotListener
+                }
+
+                for (dc in snapshots!!.documentChanges) {
+                    when (dc.type) {
+                        DocumentChange.Type.ADDED -> {
+                            Log.d(TAG, "New city: ${dc.document.data}")
+                            val staffLayout = LinearLayout(activity)
+                            staffLayout.tag = dc.document.id
+                            val staff = TextView(activity)
+                            staff.text = dc.document.id
+                            staff.textSize = 24f
+//                            staff.tag = dc.document.id
+
+                            staffLayout.setOnLongClickListener {
+                                val delBtn = Button(activity)
+                                delBtn.text = "delete"
+                                delBtn.setBackgroundColor(Color.RED)
+                                delBtn.setOnClickListener {
+                                    staffPath.document(dc.document.id).delete()
+//                                    staffLayout.removeView(delBtn)
+                                }
+                                staffLayout.addView(delBtn)
+                                return@setOnLongClickListener true
+                            }
+                            staffLayout.addView(staff)
+                            activity.staffList.addView(staffLayout)
+                        }
+                        DocumentChange.Type.MODIFIED -> {
+                            Log.d(TAG, "Modified city: ${dc.document.data}")
+                        }
+                        DocumentChange.Type.REMOVED -> {
+                            Log.d(TAG, "Removed city: ${dc.document.data}")
+                            val staff = activity.staffList.findViewWithTag<LinearLayout>(dc.document.id)
+                            activity.staffList.removeView(staff)
+                        }
+                    }
+                }
+            }
+        return snapshot
     }
     //TODO week panel
 

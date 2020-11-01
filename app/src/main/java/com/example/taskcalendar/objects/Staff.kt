@@ -1,4 +1,9 @@
 package com.example.taskcalendar.objects
 
-class Staff(val name: String) {
+
+import java.io.Serializable
+
+data class Staff(val name: String = "") : Serializable {
+
+
 }
