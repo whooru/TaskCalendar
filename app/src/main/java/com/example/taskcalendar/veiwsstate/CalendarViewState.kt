@@ -5,6 +5,7 @@ import android.app.Activity
 import android.content.ContentValues.TAG
 import android.graphics.Color
 import android.util.Log
+import android.view.View
 import android.widget.*
 import com.example.taskcalendar.objects.*
 import com.google.android.gms.tasks.Tasks
@@ -114,6 +115,7 @@ class CalendarViewState(val activity: Activity, var user: User) : State {
             activity.weekFrame.layoutParams = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT, 1f
             )
+            activity.backBtn.visibility = View.VISIBLE
         } else {
             activity.calendarFrame.layoutParams = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT, 1f
@@ -121,6 +123,7 @@ class CalendarViewState(val activity: Activity, var user: User) : State {
             activity.weekFrame.layoutParams = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT, 3f
             )
+            activity.backBtn.visibility = View.INVISIBLE
         }
     }
 
@@ -156,10 +159,10 @@ class CalendarViewState(val activity: Activity, var user: User) : State {
                 day.layoutParams = Parametres().getDayParams()
                 if (i == iter) {
                     day.setBackgroundColor(532)
-                }else{
+                } else {
                     day.setOnClickListener {
                         showWeek(activity, currentMonth, day.id)
-                        if(snapshot!=null) {
+                        if (snapshot != null) {
                             snapshot?.remove()
                         }
                     }
@@ -174,6 +177,11 @@ class CalendarViewState(val activity: Activity, var user: User) : State {
         snapshot = updateWeek(selectedDay)
         activity.addStuff.setOnClickListener {
             addStaff(selectedDay, currentMonth)
+        }
+        activity.backBtn.setOnClickListener {
+            changeWindow(activity)
+            snapshot.remove()
+
         }
     }
 
@@ -211,7 +219,7 @@ class CalendarViewState(val activity: Activity, var user: User) : State {
     }
 
     @SuppressLint("SetTextI18n")
-    private fun updateWeek(selectedDay: CDay) :ListenerRegistration{
+    private fun updateWeek(selectedDay: CDay): ListenerRegistration {
         activity.staffList.removeAllViews()
         val staffPath =
             FirebaseFirestore.getInstance().document(selectedDay.path).collection("staff")
@@ -252,7 +260,8 @@ class CalendarViewState(val activity: Activity, var user: User) : State {
                         }
                         DocumentChange.Type.REMOVED -> {
                             Log.d(TAG, "Removed city: ${dc.document.data}")
-                            val staff = activity.staffList.findViewWithTag<LinearLayout>(dc.document.id)
+                            val staff =
+                                activity.staffList.findViewWithTag<LinearLayout>(dc.document.id)
                             activity.staffList.removeView(staff)
                         }
                     }

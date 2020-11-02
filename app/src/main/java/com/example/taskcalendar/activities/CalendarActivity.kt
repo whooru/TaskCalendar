@@ -2,6 +2,8 @@ package com.example.taskcalendar.activities
 
 import android.annotation.SuppressLint
 import android.os.Bundle
+import android.view.View
+import android.widget.LinearLayout
 import androidx.appcompat.app.AppCompatActivity
 import com.example.taskcalendar.R
 import com.example.taskcalendar.objects.User
@@ -18,7 +20,7 @@ class CalendarActivity : AppCompatActivity() {
         val calendarName = intent.getStringExtra("calendar")!!
         var currentDate = LocalDateTime.now()
         val calendarViewState = CalendarViewState(this, user)
-
+        backBtn.visibility = View.INVISIBLE
         calendarViewState.showMonth(
             currentDate.month.toString(),
             calendarName,
