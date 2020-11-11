@@ -20,7 +20,6 @@ data class CCalendar(val name: String = ""): Serializable {
     }
 
     fun addYear(path: DocumentReference, year: Year){
-
         val yearPath = path.collection("years").document(year.numberOfYear.toString())
         year.makeNextYear(yearPath)
         yearsList[year.numberOfYear.toString()] = year

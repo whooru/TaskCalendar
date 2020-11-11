@@ -45,9 +45,8 @@ class CalendarViewState(val activity: Activity, var user: User) : State {
                 ?.monthsList?.get(
                     selectedMonth
                 )
-        println("it's Ok")
+
         if (currentMonth == null) {
-            println("Not ok")
             val db = FirebaseFirestore.getInstance()
             val calendar = user.calendarsList[calendarName]
             val path = db.collection("users").document(user.email).collection("callendars")
@@ -209,12 +208,13 @@ class CalendarViewState(val activity: Activity, var user: User) : State {
         confirmBtn.setOnClickListener {
             if (enterStaff.text.isNotEmpty()) {
                 val day = selectedMonth.daysList[selectedDay.id.toString()]!!
-                day.addStaff(Staff(enterStaff.text.toString()))
+                day.addStaff(enterStaff.text.toString())
                 activity.addStuff.performClick()
             } else {
                 val toast = Toast.makeText(activity, "Enter Name!", Toast.LENGTH_LONG)
                 toast.show()
             }
+            println(selectedDay.staffList)
         }
     }
 
@@ -248,6 +248,9 @@ class CalendarViewState(val activity: Activity, var user: User) : State {
                                 delBtn.setOnClickListener {
                                     staffPath.document(dc.document.id).delete()
 //                                    staffLayout.removeView(delBtn)
+                                    selectedDay.deleteStaff(staff.text.toString())
+                                    println(staff.text.toString())
+                                    println(selectedDay.staffList)
                                 }
                                 staffLayout.addView(delBtn)
                                 return@setOnLongClickListener true

@@ -11,12 +11,20 @@ data class CDay(val id: Int? = null, val numberOfDay: Int? = null, val name: Str
 //    val eventList: MutableList<Event> = mutableListOf()
 
 
-    fun addStaff(staff: Staff) {
-        staffList[staffList.size.toString()] = staff
+    fun addStaff(staffName: String) {
+        val staff= Staff(staffName)
+        staffList[staffName] = staff
         println(path)
         val staffPath = FirebaseFirestore.getInstance().document(path)
         staffPath.collection("staff").document(staff.name).set(staff)
         println(staffList)
+        staffPath.update(mapOf<String, Any>(Pair("staffList", staffList)))
+    }
+
+    fun deleteStaff(staffName: String){
+        staffList.remove(staffName)
+        val staffPath = FirebaseFirestore.getInstance().document(path)
+        staffPath.update(mapOf<String, Any>(Pair("staffList", staffList)))
     }
 
     fun addEvent(event: Event) {
