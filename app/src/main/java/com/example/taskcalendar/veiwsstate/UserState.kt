@@ -28,7 +28,7 @@ class UserState {
                             val user = document.toObject(User::class.java)!!
                             this@UserState.user = user
                             Log.d(TAG, "DocumentSnapshot data: ${document.data}")
-                            MainViewState().updateState(activity, this@UserState.user) //show user data
+//                            MainViewState().updateState(activity, this@UserState.user) //show user data
                         } else {
                             Log.d(TAG, "No such document")
                         }

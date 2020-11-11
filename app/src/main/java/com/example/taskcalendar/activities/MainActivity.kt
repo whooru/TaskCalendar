@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import com.example.taskcalendar.R
+import com.example.taskcalendar.veiwsstate.MainViewState
 import com.example.taskcalendar.veiwsstate.UserState
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -15,11 +16,9 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
             super.onCreate(savedInstanceState)
             setContentView(R.layout.activity_main)
-        val db = FirebaseFirestore.getInstance()
-        val auth = Firebase.auth
-        val currentUser = auth.currentUser
-        val userState = UserState()
-        userState.downloadUser(db, currentUser, this@MainActivity ) // download user data and show it
+
+//        userState.downloadUser(db, currentUser, this@MainActivity ) // download user data and show it
+        MainViewState().updateState(this)
     }
 }
 

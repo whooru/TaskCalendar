@@ -1,28 +1,38 @@
 package com.example.taskcalendar.objects
 
 
+import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.DocumentReference
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.ktx.Firebase
 import org.threeten.bp.LocalDate
 import java.io.Serializable
 
 
-data class CMonth(val numberOfMonth: Int? = null, val name: String = "", val monthSize: Int? = null):
+data class CMonth(
+    val numberOfMonth: Int? = null,
+    val name: String = "",
+    val monthSize: Int? = null,
+    val year: Int? = null
+) :
     Serializable {
-//    var daysList = mutableListOf<CDay>()
-    var daysList = mutableMapOf<String, CDay>()
 
-    fun makeMonth(month: LocalDate, path: DocumentReference) {
+    fun makeMonth(path: DocumentReference) {
+        val monthRef = path.collection("months").document(name)
         for (i in 1..monthSize!!) {
-            val day = CDay(
-                month.withDayOfMonth(i).dayOfYear,
-                month.withDayOfMonth(i).dayOfMonth,
-                month.withDayOfMonth(i).dayOfWeek.toString(),
-                path.collection("days").document(month.withDayOfMonth(i).dayOfMonth.toString()).path
-            )
-            daysList[day.id!!.toString()] = day
-            val dayPath = path.collection("days").document(day.numberOfDay.toString())
-
-            dayPath.set(day)
+            addDay(monthRef, i)
         }
+    }
+
+    fun addDay(path: DocumentReference, numberOfDay: Int) {
+        val dayDate: LocalDate =
+            LocalDate.now().withYear(year!!).withMonth(numberOfMonth!!).withDayOfMonth(numberOfDay)
+        val day = CDay(
+            dayDate.dayOfYear,
+            dayDate.dayOfMonth,
+            dayDate.dayOfWeek.toString(),
+            path.collection("days").document(dayDate.dayOfMonth.toString()).path
+        )
+        path.collection("days").document(day.numberOfDay.toString()).set(day)
     }
 }

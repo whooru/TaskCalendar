@@ -10,21 +10,22 @@ import android.widget.*
 import com.example.taskcalendar.objects.*
 import com.google.android.gms.tasks.Tasks
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.DocumentChange
-import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.ListenerRegistration
-import com.google.firebase.firestore.QuerySnapshot
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.firestore.*
 import com.google.firebase.firestore.core.Query
+import com.google.firebase.ktx.Firebase
 import kotlinx.android.synthetic.main.activity_calendar.*
 import kotlinx.android.synthetic.main.activity_calendar.view.*
 import kotlinx.android.synthetic.main.activity_registration.view.*
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.threeten.bp.LocalDateTime
+import java.lang.Exception
+import kotlin.coroutines.Continuation
 
-class CalendarViewState(val activity: Activity, var user: User) : State {
-    lateinit var calendar: String
+class CalendarViewState(val activity: Activity, val calendarName: String) : State {
     lateinit var year: String
     lateinit var month: String
     override fun updateState(activity: Activity, user: User) {
@@ -32,39 +33,91 @@ class CalendarViewState(val activity: Activity, var user: User) : State {
     }
 
 
-    fun showMonth(selectedMonth: String, calendarName: String, selectedYear: String) {
-        calendar = calendarName
+    fun showMonth(selectedMonth: String, selectedYear: String) {
         year = selectedYear
-        month = selectedMonth
+        month = selectedMonth.toUpperCase()
+        val user = Firebase.auth.currentUser!!
+        val db = FirebaseFirestore.getInstance()
+        val monthPath = db.collection("users").document(user.email!!).collection("calendars")
+            .document(calendarName).collection("years").document(year).collection("months")
         val todayData = LocalDateTime.now()
-        activity.month.text = selectedMonth
         activity.thisMonth.removeAllViews()
+        activity.month.text = month
+        var currentMonth: CMonth? = null
+        //находим текущий месяц
+        try {
+            val monthTask = monthPath.document(month).get()
 
-        var currentMonth =
-            user.calendarsList[calendarName]?.yearsList?.get(selectedYear)
-                ?.monthsList?.get(
-                    selectedMonth
-                )
-        println("it's Ok")
-        if (currentMonth == null) {
-            println("Not ok")
-            val db = FirebaseFirestore.getInstance()
-            val calendar = user.calendarsList[calendarName]
-            val path = db.collection("users").document(user.email).collection("callendars")
-                .document(calendar!!.name)
-            calendar.addYear(path, Year(selectedYear.toInt()))
-            currentMonth =
-                user.calendarsList[calendarName]?.yearsList?.get(selectedYear)
-                    ?.monthsList?.get(
-                        selectedMonth
-                    )
+            while (!monthTask.isComplete) {
+                Log.d(TAG, "download month")
+                println("Download month")
+            }
+
+            if (monthTask.isComplete) {
+                println("Downloaded it")
+                runBlocking {
+                    GlobalScope.launch {
+                        currentMonth = monthTask.result?.toObject(CMonth::class.java)
+
+                    }.join()
+                }
+            }
+
+//            runBlocking {
+//                GlobalScope.launch {
+//                    Tasks.await(
+//                        monthPath.document(month).get().addOnSuccessListener { document ->
+//                            if (document != null) {
+//                                currentMonth =document.toObject(CMonth::class.java)
+//                            } else {
+//                                Log.d(TAG, "No such document")
+//                            }
+//                        }
+//                    )
+//                }.join()
+//            }
+        } catch (e: Exception) {
+            Log.d(TAG, "Cant download month. Exception: ", e)
         }
+
+        //если месяца нет, значит этот год не создан, создаем год
+        if (currentMonth == null) {
+            println("Cant download")
+            val path =
+                db.collection("users").document(user.email.toString()).collection("callendars")
+                    .document(calendarName)
+            var calendar: CCalendar? = null
+
+            //TODO исправить!!!!
+            // java.lang.RuntimeException: Unable to start activity ComponentInfo{com.example.taskcalendar/com.example.taskcalendar.activities.CalendarActivity}: kotlin.KotlinNullPointerException
+            //
+            runBlocking {
+                GlobalScope.launch {
+                    Tasks.await(
+                        path.get().addOnSuccessListener { document ->
+                            if (document != null) {
+                                calendar = document.toObject(CCalendar::class.java)!!
+                            } else {
+                                Log.d(TAG, "No such document")
+                            }
+                        }
+                    )
+                }.join()
+            }
+            calendar!!.addYear(Year(year.toInt(), calendarName))
+            try {
+                currentMonth = monthPath.document(month).get().result?.toObject(CMonth::class.java)
+            } catch (e: Exception) {
+                Log.d(TAG, "Cant download month. Exception: ", e)
+            }
+        }
+
         val firstDayOfMonth =
             todayData.withMonth(currentMonth!!.numberOfMonth!!)
                 .withDayOfMonth(1).dayOfWeek.value - 1
         val lastDayOfMonth =
-            todayData.withMonth(currentMonth.numberOfMonth!!)
-                .withDayOfMonth(currentMonth.monthSize!!).dayOfWeek.value - 1
+            todayData.withMonth(currentMonth!!.numberOfMonth!!)
+                .withDayOfMonth(currentMonth!!.monthSize!!).dayOfWeek.value - 1
         var week = TableRow(activity)
         week.layoutParams = Parametres().getTableParams()
         activity.thisMonth.addView(week)
@@ -75,26 +128,30 @@ class CalendarViewState(val activity: Activity, var user: User) : State {
                 week.layoutParams = Parametres().getTableParams()
                 activity.thisMonth.addView(week)
             }
-            if (usedLength == currentMonth.monthSize!!.toInt() + (7 - lastDayOfMonth)) {
+            if (usedLength == currentMonth!!.monthSize!!.toInt() + (7 - lastDayOfMonth)) {
                 break
             }
             when (usedLength) {
-                in 1..currentMonth.monthSize!!.toInt() -> {
-                    val day = Button(activity)
-                    day.text = usedLength.toString()
-                    day.id = currentMonth.daysList.get(
-                        LocalDateTime.now().withMonth(currentMonth.numberOfMonth!!).withDayOfMonth(
-                            usedLength
-                        ).dayOfYear.toString()
-                    )!!.id!!
+                in 1..currentMonth!!.monthSize!!.toInt() -> {
+                    val btnDay = Button(activity)
+                    val day =
+                        monthPath.document(month).collection("days").document(usedLength.toString())
+                            .get().result!!.toObject(CDay::class.java)!!
+                    btnDay.text = usedLength.toString()
+                    btnDay.id = day.id!!.toInt()
                     if (LocalDateTime.now().dayOfYear == day.id) {
-                        day.setBackgroundColor(123)
+                        btnDay.setBackgroundColor(123)
                     }
-                    day.layoutParams = Parametres().getDayParams()
-                    day.setOnClickListener {
-                        showWeek(activity, currentMonth, day.id)
+                    btnDay.layoutParams = Parametres().getDayParams()
+                    btnDay.setOnClickListener {
+                        showWeek(
+                            activity,
+                            currentMonth!!,
+                            day.id,
+                            monthPath.document(currentMonth!!.name)
+                        )
                     }
-                    week.addView(day)
+                    week.addView(btnDay)
                 }
                 else -> {
                     val clearDay = Button(activity)
@@ -130,14 +187,18 @@ class CalendarViewState(val activity: Activity, var user: User) : State {
     fun showWeek(
         activity: Activity,
         currentMonth: CMonth,
-        currentDay: Int
+        currentDay: Int,
+        monthPath: DocumentReference
     ) {
         activity.weekFrame.weekDays.removeAllViews()
         val weekTb = activity.weekFrame.weekTb
         if ((activity.calendarFrame.layoutParams as LinearLayout.LayoutParams).weight == 1f) {
             changeWindow(activity)
         }
-        var dbDay = currentMonth.daysList[currentDay.toString()]!!
+        var dbDay =
+            monthPath.collection("days").document(currentDay.toString()).get().result!!.toObject(
+                CDay::class.java
+            )!!
         var iter = 1
         //monday, tuesday wednesday thursday friday saturday sunday
         when (dbDay.name.toUpperCase()) {
@@ -153,7 +214,9 @@ class CalendarViewState(val activity: Activity, var user: User) : State {
         for (i in 1..7) {
             val day = Button(activity)
             try {
-                dbDay = currentMonth.daysList[(currentDay - iter + i).toString()]!!
+                dbDay = monthPath.collection("days").document((currentDay - iter + i).toString())
+                    .get().result!!.toObject(CDay::class.java)!!
+//                dbDay = currentMonth.daysList[(currentDay - iter + i).toString()]!!
                 day.id = dbDay.id!!.toInt()
                 day.text = dbDay.numberOfDay.toString()
                 day.layoutParams = Parametres().getDayParams()
@@ -161,7 +224,7 @@ class CalendarViewState(val activity: Activity, var user: User) : State {
                     day.setBackgroundColor(532)
                 } else {
                     day.setOnClickListener {
-                        showWeek(activity, currentMonth, day.id)
+                        showWeek(activity, currentMonth, day.id, monthPath)
                         if (snapshot != null) {
                             snapshot?.remove()
                         }
@@ -173,10 +236,14 @@ class CalendarViewState(val activity: Activity, var user: User) : State {
                 weekTb.weekDays.addView(day)
             }
         }
-        val selectedDay = currentMonth.daysList[(currentDay).toString()]!!
+        val selectedDay =
+            monthPath.collection("days").document(currentDay.toString()).get().result!!.toObject(
+                CDay::class.java
+            )!!
+//        val selectedDay = currentMonth.daysList[(currentDay).toString()]!!
         snapshot = updateWeek(selectedDay)
         activity.addStuff.setOnClickListener {
-            addStaff(selectedDay, currentMonth)
+            addStaff(selectedDay, currentMonth, monthPath)
         }
         activity.backBtn.setOnClickListener {
             changeWindow(activity)
@@ -185,17 +252,21 @@ class CalendarViewState(val activity: Activity, var user: User) : State {
         }
     }
 
-    private fun cancelAddStaff(selectedDay: CDay, selectedMonth: CMonth) {
+    private fun cancelAddStaff(
+        selectedDay: CDay,
+        selectedMonth: CMonth,
+        monthPath: DocumentReference
+    ) {
         activity.addStuff.setOnClickListener {
             activity.staffList.removeView(activity.staffList.getChildAt(activity.staffList.childCount - 1))
             activity.addStuff.text = "+"
             activity.addStuff.setOnClickListener {
-                addStaff(selectedDay, selectedMonth)
+                addStaff(selectedDay, selectedMonth, monthPath)
             }
         }
     }
 
-    private fun addStaff(selectedDay: CDay, selectedMonth: CMonth) {
+    private fun addStaff(selectedDay: CDay, selectedMonth: CMonth, monthPath: DocumentReference) {
         activity.addStuff.text = "-"
         val newStaff = LinearLayout(activity)
         val enterStaff = EditText(activity)
@@ -205,10 +276,11 @@ class CalendarViewState(val activity: Activity, var user: User) : State {
         newStaff.addView(enterStaff)
 //        activity.scrollStaff.maxScrollAmount
         newStaff.addView(confirmBtn)
-        cancelAddStaff(selectedDay, selectedMonth)
+        cancelAddStaff(selectedDay, selectedMonth, monthPath)
         confirmBtn.setOnClickListener {
             if (enterStaff.text.isNotEmpty()) {
-                val day = selectedMonth.daysList[selectedDay.id.toString()]!!
+                val day = monthPath.collection("days").document(selectedDay.id.toString())
+                    .get().result!!.toObject(CDay::class.java)!!
                 day.addStaff(Staff(enterStaff.text.toString()))
                 activity.addStuff.performClick()
             } else {

@@ -16,33 +16,21 @@ class CalendarActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_calendar)
-        val user = intent.getSerializableExtra("user") as User
+//        val user = intent.getSerializableExtra("user") as User
         val calendarName = intent.getStringExtra("calendar")!!
         var currentDate = LocalDateTime.now()
-        val calendarViewState = CalendarViewState(this, user)
+        val calendarViewState = CalendarViewState(this, calendarName)
         backBtn.visibility = View.INVISIBLE
-        calendarViewState.showMonth(
-            currentDate.month.toString(),
-            calendarName,
-            currentDate.year.toString()
-        )
+        calendarViewState.showMonth(currentDate.month.toString(), currentDate.year.toString())
 
         prevMonth.setOnClickListener {
             currentDate = currentDate.minusMonths(1)
-            calendarViewState.showMonth(
-                currentDate.month.toString(),
-                calendarName,
-                currentDate.year.toString()
-            )
+            calendarViewState.showMonth(currentDate.month.toString(), currentDate.year.toString())
         }
 
         nextMonth.setOnClickListener {
             currentDate = currentDate.plusMonths(1)
-            calendarViewState.showMonth(
-                currentDate.month.toString(),
-                calendarName,
-                currentDate.year.toString()
-            )
+            calendarViewState.showMonth(currentDate.month.toString(), currentDate.year.toString())
         }
     }
 }

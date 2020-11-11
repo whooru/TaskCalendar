@@ -45,9 +45,10 @@ class RegActivity : AppCompatActivity() {
                         if (task.isSuccessful) {
                             Log.d(TAG, "createUserWithEmail:success")
                             db.collection("users").document(user.email).set(user)
-                            user.makeDb()
                             val user = auth.currentUser
                             user?.displayName
+                            val intent = Intent(this, MainActivity::class.java)
+                            startActivity(intent)
                         } else {
                             Log.w(TAG, "createUserWithEmail:failure", task.exception)
                             Toast.makeText(

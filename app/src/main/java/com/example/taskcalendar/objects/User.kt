@@ -12,54 +12,26 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import java.io.Serializable
+import org.threeten.bp.LocalDate
 
 
 data class User(
     var name: String = "",
     var login: String = "",
-    var email: String = "",
-    var calendarsMap: MutableMap<String, String> = mutableMapOf(),
-    var calendarsList: MutableMap<String, CCalendar> = mutableMapOf()
+    var email: String = ""
+
 ) : Serializable {
 
 
-
-    fun makeDb() {
+    fun addCalendar(calendarName: String){
         val db = FirebaseFirestore.getInstance()
-        val calendar = CCalendar("1")
-        calendarsMap[(calendarsMap.size + 1).toString()] = calendar.name
-        val path =
-            db.collection("users").document(email).collection("callendars").document(calendar.name)
-        calendar.makeCalendar(path)
-        calendarsList[calendar.name] = calendar
-        db.collection("users").document(email).set(this)
-        path.set(calendar)
+        val path = db.collection("users").document(email)
+        val calendar = CCalendar(calendarName)
+        calendar.addYear(Year(LocalDate.now().year, calendarName))
+        path.collection("calendars").document(calendarName).set(calendar)
+
     }
 
 
-
-//    fun downloadFromDb() {
-//        val db = FirebaseFirestore.getInstance()
-//
-//        for (i in 1..calendarsMap.size + 1) {
-//            val docRef = db.collection("users").document(email).collection("calendars")
-//                .document(calendarsMap[i.toString()]!!)
-//            docRef.get()
-//                .addOnSuccessListener { document ->
-//                    if (document != null) {
-//                        var calendar = document.toObject(CCalendar::class.java)
-//                        if (calendar != null) {
-//                            this.calendarsList[calendar.name] = calendar
-//                        }
-//                        Log.d("INFO", "DocumentSnapshot data: ${document.data}")
-//                    } else {
-//                        Log.d("INFO", "No such document")
-//                    }
-//                }
-//                .addOnFailureListener { exception ->
-//                    Log.d("INFO", "get failed with ", exception)
-//                }
-//        }
-//    }
 
 }
