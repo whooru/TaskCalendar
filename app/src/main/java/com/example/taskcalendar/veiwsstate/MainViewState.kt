@@ -20,7 +20,6 @@ import java.io.Serializable
 class MainViewState : State {
     override fun updateState(activity: Activity, user: User) {
         //make user's calendars
-//        val user = Firebase.auth.currentUser!!
         val db = FirebaseFirestore.getInstance()
         val pathCalendar =
             db.collection("users").document(user.email).collection("calendars")
@@ -63,53 +62,16 @@ class MainViewState : State {
         }
 
         activity.addCalendar.setOnClickListener {
-//            val user: User? = db.collection("users").document(user.email.toString())
-//                .get().result!!.toObject(User::class.java)
-
-
             val dialog = Dialog(activity)
             dialog.setContentView(R.layout.create_calendar_fragment)
             dialog.show()
             dialog.btn_create_calendar.setOnClickListener {
                 user.addCalendar(dialog.txt_calendar_name.text.toString())
                 dialog.cancel()
-//                updateState(activity)
             }
             dialog.btn_cancel.setOnClickListener {
                 dialog.cancel()
             }
         }
-//        val textView = TextView(activity)
-//        val calendarList = ConstraintLayout(activity)
-//        val tableLayout = TableLayout(activity)
-//        var tableRow = TableRow(activity)
-//        activity.clayout.addView(textView)
-//        tableLayout.layoutParams = Parametres().getTableParams() as ViewGroup.LayoutParams?
-//        tableRow.layoutParams = Parametres().getTableParams()
-//        calendarList.addView(tableLayout)
-//        tableLayout.addView(tableRow)
-//
-//        var i = 0
-//        for (calendar in user.calendarsMap.keys) {
-//            if (i < 2) {
-//                val calendarBtn = Button(activity)
-//                calendarBtn.text = calendar
-//                calendarBtn.layoutParams = Parametres().getDayParams()
-//                calendarBtn.setOnClickListener {                               //open calendar
-//                    val intent: Intent = Intent(activity, CalendarActivity::class.java).apply {
-//                        putExtra("user", user as Serializable)
-//                        putExtra("calendar", calendar)
-//                    }
-//                    activity.startActivity(intent)
-//                }
-//                tableRow.addView(calendarBtn)
-//            } else {
-//                tableRow = TableRow(activity)
-//                tableLayout.addView(tableRow)
-//                i = 0
-//            }
-//            i++
-//        }
-//        activity.setContentView(calendarList)
     }
 }

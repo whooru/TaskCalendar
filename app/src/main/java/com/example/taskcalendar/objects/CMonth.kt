@@ -8,7 +8,6 @@ import java.io.Serializable
 
 data class CMonth(val numberOfMonth: Int? = null, val name: String = "", val monthSize: Int? = null):
     Serializable {
-//    var daysList = mutableListOf<CDay>()
     var daysList = mutableMapOf<String, CDay>()
 
     fun makeMonth(month: LocalDate, path: DocumentReference) {

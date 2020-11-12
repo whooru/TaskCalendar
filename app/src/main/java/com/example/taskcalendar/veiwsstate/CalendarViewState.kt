@@ -8,19 +8,11 @@ import android.util.Log
 import android.view.View
 import android.widget.*
 import com.example.taskcalendar.objects.*
-import com.google.android.gms.tasks.Tasks
-import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.DocumentChange
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ListenerRegistration
-import com.google.firebase.firestore.QuerySnapshot
-import com.google.firebase.firestore.core.Query
 import kotlinx.android.synthetic.main.activity_calendar.*
 import kotlinx.android.synthetic.main.activity_calendar.view.*
-import kotlinx.android.synthetic.main.activity_registration.view.*
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import org.threeten.bp.LocalDateTime
 
 class CalendarViewState(val activity: Activity, var user: User) : State {
@@ -202,14 +194,12 @@ class CalendarViewState(val activity: Activity, var user: User) : State {
         newStaff.setHorizontalGravity(1)
         activity.staffList.addView(newStaff)
         newStaff.addView(enterStaff)
-//        activity.scrollStaff.maxScrollAmount
         newStaff.addView(confirmBtn)
         cancelAddStaff(selectedDay, selectedMonth)
         confirmBtn.setOnClickListener {
             if (enterStaff.text.isNotEmpty()) {
-//                val day = selectedMonth.daysList[selectedDay.id.toString()]!!
-//                day.addStaff(enterStaff.text.toString())
-                user.calendarsList[calendar]!!.yearsList[year]!!.monthsList[month]!!.daysList[selectedDay.id.toString()]!!.addStaff(enterStaff.text.toString())
+                val day = selectedMonth.daysList[selectedDay.id.toString()]!!
+                day.addStaff(enterStaff.text.toString())
                 activity.addStuff.performClick()
             } else {
                 val toast = Toast.makeText(activity, "Enter Name!", Toast.LENGTH_LONG)
@@ -240,7 +230,6 @@ class CalendarViewState(val activity: Activity, var user: User) : State {
                             val staff = TextView(activity)
                             staff.text = dc.document.id
                             staff.textSize = 24f
-//                            staff.tag = dc.document.id
 
                             staffLayout.setOnLongClickListener {
                                 val delBtn = Button(activity)

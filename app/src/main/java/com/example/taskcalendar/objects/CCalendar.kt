@@ -7,8 +7,6 @@ import java.io.Serializable
 
 
 data class CCalendar(val name: String = "", val owner: String = ""): Serializable {
-//    lateinit var path: DocumentReference
-//    var yearsList = mutableListOf<Year>()
     var yearsList = mutableMapOf<String, Year>()
 
     fun makeCalendar(path: DocumentReference) {
@@ -25,7 +23,4 @@ data class CCalendar(val name: String = "", val owner: String = ""): Serializabl
         yearsList[year.numberOfYear.toString()] = year
         yearPath.set(year)
     }
-
-    fun downloadFormDb(){}
-
 }
