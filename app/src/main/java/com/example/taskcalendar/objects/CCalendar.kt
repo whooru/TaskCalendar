@@ -6,7 +6,7 @@ import org.threeten.bp.LocalDate
 import java.io.Serializable
 
 
-data class CCalendar(val name: String = ""): Serializable {
+data class CCalendar(val name: String = "", val owner: String = ""): Serializable {
 //    lateinit var path: DocumentReference
 //    var yearsList = mutableListOf<Year>()
     var yearsList = mutableMapOf<String, Year>()

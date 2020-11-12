@@ -39,13 +39,13 @@ class CalendarViewState(val activity: Activity, var user: User) : State {
         val todayData = LocalDateTime.now()
         activity.month.text = selectedMonth
         activity.thisMonth.removeAllViews()
-
+        //определяем выбранный месяц
         var currentMonth =
             user.calendarsList[calendarName]?.yearsList?.get(selectedYear)
                 ?.monthsList?.get(
                     selectedMonth
                 )
-
+        //если месяца нет, создаем
         if (currentMonth == null) {
             val db = FirebaseFirestore.getInstance()
             val calendar = user.calendarsList[calendarName]
@@ -207,8 +207,9 @@ class CalendarViewState(val activity: Activity, var user: User) : State {
         cancelAddStaff(selectedDay, selectedMonth)
         confirmBtn.setOnClickListener {
             if (enterStaff.text.isNotEmpty()) {
-                val day = selectedMonth.daysList[selectedDay.id.toString()]!!
-                day.addStaff(enterStaff.text.toString())
+//                val day = selectedMonth.daysList[selectedDay.id.toString()]!!
+//                day.addStaff(enterStaff.text.toString())
+                user.calendarsList[calendar]!!.yearsList[year]!!.monthsList[month]!!.daysList[selectedDay.id.toString()]!!.addStaff(enterStaff.text.toString())
                 activity.addStuff.performClick()
             } else {
                 val toast = Toast.makeText(activity, "Enter Name!", Toast.LENGTH_LONG)
@@ -233,7 +234,7 @@ class CalendarViewState(val activity: Activity, var user: User) : State {
                 for (dc in snapshots!!.documentChanges) {
                     when (dc.type) {
                         DocumentChange.Type.ADDED -> {
-                            Log.d(TAG, "New city: ${dc.document.data}")
+                            Log.d(TAG, "New: ${dc.document.data}")
                             val staffLayout = LinearLayout(activity)
                             staffLayout.tag = dc.document.id
                             val staff = TextView(activity)
@@ -259,10 +260,10 @@ class CalendarViewState(val activity: Activity, var user: User) : State {
                             activity.staffList.addView(staffLayout)
                         }
                         DocumentChange.Type.MODIFIED -> {
-                            Log.d(TAG, "Modified city: ${dc.document.data}")
+                            Log.d(TAG, "Modified: ${dc.document.data}")
                         }
                         DocumentChange.Type.REMOVED -> {
-                            Log.d(TAG, "Removed city: ${dc.document.data}")
+                            Log.d(TAG, "Removed: ${dc.document.data}")
                             val staff =
                                 activity.staffList.findViewWithTag<LinearLayout>(dc.document.id)
                             activity.staffList.removeView(staff)

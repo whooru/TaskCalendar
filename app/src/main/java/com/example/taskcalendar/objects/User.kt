@@ -26,10 +26,21 @@ data class User(
 
     fun makeDb() {
         val db = FirebaseFirestore.getInstance()
-        val calendar = CCalendar("1")
+        val calendar = CCalendar("1", login)
         calendarsMap[(calendarsMap.size + 1).toString()] = calendar.name
         val path =
-            db.collection("users").document(email).collection("callendars").document(calendar.name)
+            db.collection("users").document(email).collection("calendars").document(calendar.name)
+        calendar.makeCalendar(path)
+        calendarsList[calendar.name] = calendar
+        db.collection("users").document(email).set(this)
+        path.set(calendar)
+    }
+
+    fun addCalendar(calendarName: String){
+        val db = FirebaseFirestore.getInstance()
+        val calendar = CCalendar(calendarName, login)
+        val path =
+            db.collection("users").document(email).collection("calendars").document(calendar.name)
         calendar.makeCalendar(path)
         calendarsList[calendar.name] = calendar
         db.collection("users").document(email).set(this)
