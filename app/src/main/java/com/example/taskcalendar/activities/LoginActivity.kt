@@ -32,11 +32,8 @@ class LoginActivity : AppCompatActivity() {
                             baseContext, "Authentication failed.",
                             Toast.LENGTH_SHORT
                         ).show()
-//                    updateUI(null)
-                        // ...
-                    }
 
-                    // ...
+                    }
                 }
         }
         LRegBtn.setOnClickListener {

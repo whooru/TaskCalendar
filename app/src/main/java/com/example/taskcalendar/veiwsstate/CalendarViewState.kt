@@ -1,20 +1,38 @@
 package com.example.taskcalendar.veiwsstate
 
+import android.R.attr.fragment
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.ContentValues.TAG
 import android.graphics.Color
 import android.util.Log
 import android.view.View
+import android.view.ViewTreeObserver.OnScrollChangedListener
 import android.widget.*
-import com.example.taskcalendar.objects.*
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentManager
+import androidx.fragment.app.FragmentTransaction
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import com.example.taskcalendar.R
+import com.example.taskcalendar.objects.CDay
+import com.example.taskcalendar.objects.CMonth
+import com.example.taskcalendar.objects.User
 import com.google.firebase.firestore.DocumentChange
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ListenerRegistration
 import kotlinx.android.synthetic.main.activity_calendar.*
 import kotlinx.android.synthetic.main.activity_calendar.view.*
-import org.threeten.bp.LocalDateTime
+import kotlinx.android.synthetic.main.activity_calendar_list.*
+import kotlinx.android.synthetic.main.fragment_month.view.*
 
+
+//import android.support.v7.widget.Toolbar
+
+/*
+TODO переделать все под новый activity
+TODO удалить ненужные xml файлы
+ */
 class CalendarViewState(val activity: Activity, var user: User) : State {
     lateinit var calendar: String
     lateinit var year: String
@@ -25,77 +43,7 @@ class CalendarViewState(val activity: Activity, var user: User) : State {
 
 
     fun showMonth(selectedMonth: String, calendarName: String, selectedYear: String) {
-        calendar = calendarName
-        year = selectedYear
-        month = selectedMonth
-        val todayData = LocalDateTime.now()
-        activity.month.text = selectedMonth
-        activity.thisMonth.removeAllViews()
-        //определяем выбранный месяц
-        var currentMonth =
-            user.calendarsList[calendarName]?.yearsList?.get(selectedYear)
-                ?.monthsList?.get(
-                    selectedMonth
-                )
-        //если месяца нет, создаем
-        if (currentMonth == null) {
-            val db = FirebaseFirestore.getInstance()
-            val calendar = user.calendarsList[calendarName]
-            val path = db.collection("users").document(user.email).collection("callendars")
-                .document(calendar!!.name)
-            calendar.addYear(path, Year(selectedYear.toInt()))
-            currentMonth =
-                user.calendarsList[calendarName]?.yearsList?.get(selectedYear)
-                    ?.monthsList?.get(
-                        selectedMonth
-                    )
-        }
-        val firstDayOfMonth =
-            todayData.withMonth(currentMonth!!.numberOfMonth!!)
-                .withDayOfMonth(1).dayOfWeek.value - 1
-        val lastDayOfMonth =
-            todayData.withMonth(currentMonth.numberOfMonth!!)
-                .withDayOfMonth(currentMonth.monthSize!!).dayOfWeek.value - 1
-        var week = TableRow(activity)
-        week.layoutParams = Parametres().getTableParams()
-        activity.thisMonth.addView(week)
-        var usedLength = 1 - firstDayOfMonth
-        while (true) {
-            if (week.childCount == 7) {
-                week = TableRow(activity)
-                week.layoutParams = Parametres().getTableParams()
-                activity.thisMonth.addView(week)
-            }
-            if (usedLength == currentMonth.monthSize!!.toInt() + (7 - lastDayOfMonth)) {
-                break
-            }
-            when (usedLength) {
-                in 1..currentMonth.monthSize!!.toInt() -> {
-                    val day = Button(activity)
-                    day.text = usedLength.toString()
-                    day.id = currentMonth.daysList.get(
-                        LocalDateTime.now().withMonth(currentMonth.numberOfMonth!!).withDayOfMonth(
-                            usedLength
-                        ).dayOfYear.toString()
-                    )!!.id!!
-                    if (LocalDateTime.now().dayOfYear == day.id) {
-                        day.setBackgroundColor(123)
-                    }
-                    day.layoutParams = Parametres().getDayParams()
-                    day.setOnClickListener {
-                        showWeek(activity, currentMonth, day.id)
-                    }
-                    week.addView(day)
-                }
-                else -> {
-                    val clearDay = Button(activity)
-                    clearDay.text = ""
-                    clearDay.layoutParams = Parametres().getDayParams()
-                    week.addView(clearDay)
-                }
-            }
-            usedLength++
-        }
+
     }
 
     fun changeWindow(activity: Activity) {

@@ -6,7 +6,7 @@ import org.threeten.bp.LocalDate
 import java.io.Serializable
 
 
-data class CMonth(val numberOfMonth: Int? = null, val name: String = "", val monthSize: Int? = null):
+data class CMonth(val numberOfMonth: Int? = null, val name: String = "", val monthSize: Int? = null, val year: Int? = null):
     Serializable {
     var daysList = mutableMapOf<String, CDay>()
 
