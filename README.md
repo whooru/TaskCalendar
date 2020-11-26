@@ -8,7 +8,7 @@ At this stage, done:
  - Database (just Firebase)
  - Registration (the same Firebase)
  - Calendar and 90% of its functions
-   Such as:
+   <br>Such as:
     - Creating a calendar (naturally, it is immediately linked to a user in the database)
     - Calendar view (the calendar is presented in the form of a RecyclerView ribbon of months), months are loaded as needed
     - Viewing the week (in the form of a sliding panel from the month) and the day itself (in the week panel)
