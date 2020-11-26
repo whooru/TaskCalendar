@@ -34,6 +34,9 @@ class CalendarActivity : AppCompatActivity() {
         recyclerView.layoutManager = layoutManager
         recyclerView.adapter = adapter
         recyclerView.addItemDecoration(DividerItemDecoration(this, DividerItemDecoration.VERTICAL))
+        val fragmentManaget = supportFragmentManager
+        fragmentManaget.beginTransaction()
+
         recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             var previousTotal = 0
             var loading = true
@@ -45,6 +48,7 @@ class CalendarActivity : AppCompatActivity() {
                 visibleItemCount = recyclerView.childCount
                 totalItemCount = layoutManager.itemCount
                 firstVisibleItem = layoutManager.findFirstVisibleItemPosition()
+
                 if (loading) {
                     if (totalItemCount > previousTotal) {
                         loading = false
@@ -79,10 +83,13 @@ class CalendarActivity : AppCompatActivity() {
                         )
                     }
                     adapter!!.notifyDataSetChanged()
+
+
                     loading = true
                 }
             }
         })
+
     }
 
     private fun generateData(list: MutableCollection<CMonth>): MutableList<CMonth> {

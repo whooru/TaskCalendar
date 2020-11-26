@@ -61,6 +61,7 @@ class MainViewState : State {
             }
         }
 
+
         activity.addCalendar.setOnClickListener {
             val dialog = Dialog(activity)
             dialog.setContentView(R.layout.create_calendar_fragment)

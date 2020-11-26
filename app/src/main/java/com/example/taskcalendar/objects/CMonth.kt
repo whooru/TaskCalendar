@@ -13,7 +13,7 @@ data class CMonth(val numberOfMonth: Int? = null, val name: String = "", val mon
     fun makeMonth(month: LocalDate, path: DocumentReference) {
         for (i in 1..monthSize!!) {
             val day = CDay(
-                month.withDayOfMonth(i).dayOfYear,
+                month.withDayOfMonth(i).dayOfYear+ month.year*1000,
                 month.withDayOfMonth(i).dayOfMonth,
                 month.withDayOfMonth(i).dayOfWeek.toString(),
                 path.collection("days").document(month.withDayOfMonth(i).dayOfMonth.toString()).path
