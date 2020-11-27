@@ -81,19 +81,7 @@ class MonthViewHolder(val inflater: LayoutInflater, val parent: ViewGroup) :
                             day.setBackgroundColor(123)
                         }
                     } catch (e: KotlinNullPointerException) {
-                        println(month.name)
-                        println(month.daysList)
-                        println(usedLength)
-                        try {
-                            println(
-                                month.daysList[LocalDateTime.now()
-                                    .withYear(month.year)
-                                    .withMonth(month.numberOfMonth)
-                                    .withDayOfMonth(usedLength).dayOfYear.toString()]
-                            )
-                        } catch (e: Exception) {
-                            println(e)
-                        }
+
                     }
                     day.layoutParams = Parametres().getDayParams()
                     day.setOnClickListener {
@@ -229,8 +217,6 @@ class MonthViewHolder(val inflater: LayoutInflater, val parent: ViewGroup) :
                                     staffPath.document(dc.document.id).delete()
 //                                    staffLayout.removeView(delBtn)
                                     selectedDay.deleteStaff(staff.text.toString())
-                                    println(staff.text.toString())
-                                    println(selectedDay.staffList)
                                 }
                                 staffLayout.addView(delBtn)
                                 return@setOnLongClickListener true

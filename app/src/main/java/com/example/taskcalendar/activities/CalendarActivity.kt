@@ -61,12 +61,9 @@ class CalendarActivity : AppCompatActivity() {
                     val list = mutableListOf<CMonth>()
                     var nextYear =
                         user.calendarsList[calendarName]!!.yearsList[currentYear.toString()]
-                    println(nextYear)
                     if (nextYear != null) {
-                        println("i'm in block IF")
                         list.addAll(nextYear.monthsList.values)
                     } else {
-                        println("i'm in block ELSE")
                         val path = FirebaseFirestore.getInstance().collection("users")
                             .document(user.email)
                             .collection("calendars").document(calendarName)
@@ -83,8 +80,6 @@ class CalendarActivity : AppCompatActivity() {
                         )
                     }
                     adapter!!.notifyDataSetChanged()
-
-
                     loading = true
                 }
             }
