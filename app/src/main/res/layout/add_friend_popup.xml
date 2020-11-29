@@ -7,25 +7,18 @@
     android:orientation="vertical" >
 
     <TextView
-        android:id="@+id/lbl_calendar_name"
+        android:id="@+id/lbl_friends_login"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Имя календаря" />
+        android:text="Логин пользователя" />
 
     <EditText
-        android:id="@+id/txt_calendar_name"
+        android:id="@+id/txt_friend_login"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:imeOptions="actionDone"
         android:inputType="textPersonName" >
     </EditText>
-
-    <CheckBox
-        android:id="@+id/chk_access"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:checked="true"
-        android:text="public" />
 
     <LinearLayout
         android:layout_width="wrap_content"
@@ -33,11 +26,11 @@
         android:orientation="horizontal">
 
         <Button
-            android:id="@+id/btn_create_calendar"
+            android:id="@+id/btn_add_friend"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Создать"
+            android:text="Добавить"
             android:textSize="10sp" />
 
         <Button

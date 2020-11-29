@@ -16,8 +16,8 @@ import kotlinx.android.synthetic.main.activity_registration.*
 
 
 class RegActivity : AppCompatActivity() {
+    val TAG = "REG"
 
-    var TAG = "TAG"
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         AndroidThreeTen.init(this)
@@ -45,6 +45,7 @@ class RegActivity : AppCompatActivity() {
                         if (task.isSuccessful) {
                             Log.d(TAG, "createUserWithEmail:success")
                             db.collection("users").document(user.email).set(user)
+                            db.collection("usersLogin").document(user.login).set(mapOf(Pair("Email", user.email)))
                         } else {
                             Log.w(TAG, "createUserWithEmail:failure", task.exception)
                             Toast.makeText(

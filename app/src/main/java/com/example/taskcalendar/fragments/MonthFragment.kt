@@ -12,7 +12,6 @@ import com.example.taskcalendar.objects.User
 
 class MonthFragment() : Fragment() {
     lateinit var user: User
-    lateinit var frManager: FragmentManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -24,7 +23,6 @@ class MonthFragment() : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        frManager = fragmentManager!!
         return inflater.inflate(R.layout.month_main, container, false);
     }
 

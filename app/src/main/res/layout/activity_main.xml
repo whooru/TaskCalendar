@@ -2,7 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/clayout"
+    android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
 
@@ -10,17 +10,36 @@
     android:orientation="vertical"
     tools:context=".activities.MainActivity">
 
-    <androidx.gridlayout.widget.GridLayout
-        android:id="@+id/calendarList"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:layout_marginTop="50dp"
-        app:columnCount="2" />
+    <LinearLayout
+        android:id="@+id/clayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:gravity="center_horizontal"
+        android:orientation="vertical">
 
-    <Button
-        android:id="@+id/addCalendar"
-        android:layout_width="wrap_content"
+        <androidx.gridlayout.widget.GridLayout
+            android:id="@+id/calendarList"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="50dp"
+            app:columnCount="2">
+
+        </androidx.gridlayout.widget.GridLayout>
+
+        <Button
+            android:id="@+id/addCalendar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="add" />
+
+    </LinearLayout>
+
+    <fragment
+        android:id="@+id/fragment2"
+        android:name="com.example.taskcalendar.fragments.FriendsPanelFragment"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="add" />
+        android:layout_gravity="bottom" />
 </LinearLayout>

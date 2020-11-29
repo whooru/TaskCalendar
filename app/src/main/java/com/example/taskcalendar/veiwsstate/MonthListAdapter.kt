@@ -5,13 +5,17 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.example.taskcalendar.objects.CMonth
 import com.example.taskcalendar.objects.User
+import kotlinx.coroutines.*
 import org.threeten.bp.LocalDateTime
+import kotlin.coroutines.coroutineContext
+
 
 class MonthListAdapter(
     val monthsList: MutableList<CMonth>,
     val user: User,
     private val calendarName: String,
     private val date: LocalDateTime
+
 ) :
     RecyclerView.Adapter<MonthViewHolder>() {
     var position: Int = 0
@@ -23,12 +27,15 @@ class MonthListAdapter(
     override fun onBindViewHolder(holder: MonthViewHolder, position: Int) {
         this.position = position
         val month = monthsList[position]
-        holder.bind(month, user, calendarName, date)
+        runBlocking {
+            launch {
+                holder.bind(month, user, calendarName, date)
+            }
+        }
     }
-
 
     override fun getItemCount() = monthsList.size
 
-
 }
+
 

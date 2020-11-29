@@ -19,8 +19,8 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ListenerRegistration
 import kotlinx.android.synthetic.main.month_item.view.*
 import kotlinx.android.synthetic.main.week_item.view.*
+import kotlinx.coroutines.*
 import org.threeten.bp.LocalDateTime
-import java.lang.Exception
 import java.util.*
 
 
@@ -40,6 +40,7 @@ class MonthViewHolder(val inflater: LayoutInflater, val parent: ViewGroup) :
     }
 
     fun bind(month: CMonth?, user: User, calendarName: String, date: LocalDateTime) {
+        var snapshot: ListenerRegistration? = null
         week!!.removeAllViews()
         val todayData = LocalDateTime.now()
         mTitleView?.text = month!!.name
@@ -85,9 +86,11 @@ class MonthViewHolder(val inflater: LayoutInflater, val parent: ViewGroup) :
                     }
                     day.layoutParams = Parametres().getDayParams()
                     day.setOnClickListener {
-//                     TODO
-                        showWeek(month, day.id)
-
+                        //TODO
+                        if (snapshot != null) {
+                            snapshot!!.remove()
+                        }
+                        snapshot = showWeek(month, day.id)
                     }
                     week.addView(day)
                 }
@@ -105,12 +108,12 @@ class MonthViewHolder(val inflater: LayoutInflater, val parent: ViewGroup) :
     private fun showWeek(
         currentMonth: CMonth,
         currentDay: Int
-    ) {
+    ): ListenerRegistration {
         weekFragment = inflater.inflate(R.layout.week_item, parent, false)!!
         week!!.removeAllViews()
         var snapshot: ListenerRegistration? = null
         var dbDay = currentMonth.daysList[currentDay.toString()]!!
-        println(dbDay.staffList)
+        println("${dbDay.staffList} from ViewHolder")
         var iter = 1
         when (dbDay.name.toUpperCase()) {
             "MONDAY" -> iter = 1
@@ -152,6 +155,7 @@ class MonthViewHolder(val inflater: LayoutInflater, val parent: ViewGroup) :
             addStaff(selectedDay, currentMonth)
         }
         week!!.addView(weekFragment)
+        return snapshot
     }
 
 
@@ -193,7 +197,7 @@ class MonthViewHolder(val inflater: LayoutInflater, val parent: ViewGroup) :
         weekFragment!!.staffList.removeAllViews()
         val staffPath =
             FirebaseFirestore.getInstance().document(selectedDay.path).collection("staff")
-        val snapshot = staffPath
+        return staffPath
             .addSnapshotListener { snapshots, e ->
                 if (e != null) {
                     Log.w(ContentValues.TAG, "listen:error", e)
@@ -215,7 +219,6 @@ class MonthViewHolder(val inflater: LayoutInflater, val parent: ViewGroup) :
                                 delBtn.setBackgroundColor(Color.RED)
                                 delBtn.setOnClickListener {
                                     staffPath.document(dc.document.id).delete()
-//                                    staffLayout.removeView(delBtn)
                                     selectedDay.deleteStaff(staff.text.toString())
                                 }
                                 staffLayout.addView(delBtn)
@@ -236,7 +239,6 @@ class MonthViewHolder(val inflater: LayoutInflater, val parent: ViewGroup) :
                     }
                 }
             }
-        return snapshot
     }
 }
 

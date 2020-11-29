@@ -9,7 +9,7 @@ import org.threeten.bp.LocalDate
 import java.io.Serializable
 
 
-data class CCalendar(val name: String = "", val owner: String = "") : Serializable {
+data class CCalendar(val name: String = "", val owner: String = "", val public: Boolean = true) : Serializable {
     var yearsList = mutableMapOf<String, Year>()
 
     fun makeCalendar(path: DocumentReference) {

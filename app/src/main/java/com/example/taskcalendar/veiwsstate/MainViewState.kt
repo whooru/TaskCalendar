@@ -48,7 +48,7 @@ class MainViewState : State {
                             activity.startActivity(intent)
                             snapshot!!.remove()
                         }
-                        activity.clayout.calendarList.addView(calendarBtn)
+                        activity.main.calendarList.addView(calendarBtn)
                     }
                     DocumentChange.Type.MODIFIED -> {
                         Log.d(ContentValues.TAG, "Modified calendar: ${dc.document.data}")
@@ -67,7 +67,7 @@ class MainViewState : State {
             dialog.setContentView(R.layout.create_calendar_fragment)
             dialog.show()
             dialog.btn_create_calendar.setOnClickListener {
-                user.addCalendar(dialog.txt_calendar_name.text.toString())
+                user.addCalendar(dialog.txt_calendar_name.text.toString(), dialog.chk_access.isChecked)
                 dialog.cancel()
             }
             dialog.btn_cancel.setOnClickListener {
