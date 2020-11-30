@@ -13,3 +13,4 @@ At this stage, done:
     - Calendar view (the calendar is presented in the form of a RecyclerView ribbon of months), months are loaded as needed
     - Viewing the week (in the form of a sliding panel from the month) and the day itself (in the week panel)
     - Ability to add and remove staff for the day
+ - Friends panel and the ability to add them
