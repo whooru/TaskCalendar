@@ -17,8 +17,9 @@ import kotlinx.android.synthetic.main.activity_main.view.*
 import kotlinx.android.synthetic.main.create_calendar_fragment.*
 import java.io.Serializable
 
-class MainViewState : State {
-    override fun updateState(activity: Activity, user: User) {
+class MainViewState(private val activity: Activity)  {
+
+    fun updateState( user: User) {
         //make user's calendars
         val db = FirebaseFirestore.getInstance()
         val pathCalendar =

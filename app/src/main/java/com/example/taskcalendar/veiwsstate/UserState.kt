@@ -1,41 +1,47 @@
 package com.example.taskcalendar.veiwsstate
 
-import android.annotation.SuppressLint
-import android.app.Activity
-import android.content.ContentValues.TAG
-import android.util.Log
+
 import com.example.taskcalendar.objects.User
-import com.google.android.gms.tasks.Tasks
-import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.FirebaseFirestore
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
+import com.google.firebase.firestore.Source
+import kotlinx.coroutines.tasks.await
+import java.lang.Exception
+class UserState(private val db: FirebaseFirestore) {
 
-class UserState {
-    lateinit var user: User
-
-    @SuppressLint("SetTextI18n")
-    //try to download user data, if it's ok, show user data on activity
-    fun downloadUser(db: FirebaseFirestore, currentUser: FirebaseUser?, activity: Activity) {
-        val docRef = db.collection("users").document(currentUser?.email.toString())
-        runBlocking {
-            GlobalScope.launch {
-                Tasks.await(docRef.get()
-                    .addOnSuccessListener { document ->
-                        if (document != null) {
-                            val user = document.toObject(User::class.java)!!
-                            this@UserState.user = user
-                            Log.d(TAG, "DocumentSnapshot data: ${document.data}")
-                            MainViewState().updateState(activity, this@UserState.user) //show user data
-                        } else {
-                            Log.d(TAG, "No such document")
-                        }
-                    }
-                    .addOnFailureListener { exception ->
-                        Log.d(TAG, "get failed with ", exception)
-                    })
-            }.join()
+    suspend fun downloadUser(
+        currentUser: String
+    ): User? {
+        val docRef = db.collection("users").document(currentUser)
+        var user: User? = null
+        try {
+            val d = docRef.get().await()
+            user = d.toObject(User::class.java)
+        } catch (e: Exception) {
+            return null
         }
+        return user
+    }
+
+    suspend fun downloadUsersLogin(): MutableMap<String, String> {
+        val path = db.collection("usersLogin")
+        val loginList: MutableMap<String, String> = mutableMapOf()
+        try {
+            val list = path.get(Source.SERVER).await()
+            for (document in list.documents) {
+                loginList[document.id] = document.data?.get("email").toString()
+            }
+        } catch (e: Exception) {
+        }
+        return loginList
+    }
+
+    suspend fun downloadCalendars(email: String) : MutableList<String> {
+        val path = db.collection("users").document(email).collection("calendars")
+        val calendarList = mutableListOf<String>()
+        val documents = path.whereEqualTo("public", true).get().await()
+        for (document in documents){
+            calendarList.add(document.id)
+        }
+        return calendarList
     }
 }

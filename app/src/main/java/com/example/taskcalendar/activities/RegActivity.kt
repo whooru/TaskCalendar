@@ -45,7 +45,7 @@ class RegActivity : AppCompatActivity() {
                         if (task.isSuccessful) {
                             Log.d(TAG, "createUserWithEmail:success")
                             db.collection("users").document(user.email).set(user)
-                            db.collection("usersLogin").document(user.login).set(mapOf(Pair("Email", user.email)))
+                            db.collection("usersLogin").document(user.login).set(mapOf(Pair("email", user.email)))
                         } else {
                             Log.w(TAG, "createUserWithEmail:failure", task.exception)
                             Toast.makeText(

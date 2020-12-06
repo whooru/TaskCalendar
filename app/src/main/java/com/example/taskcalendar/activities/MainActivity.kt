@@ -4,12 +4,14 @@ import android.annotation.SuppressLint
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import com.example.taskcalendar.R
-import com.example.taskcalendar.fragments.FriendsPanelFragment
+import com.example.taskcalendar.veiwsstate.MainViewState
 import com.example.taskcalendar.veiwsstate.UserState
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.ktx.Firebase
-import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
 
@@ -19,9 +21,16 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         val db = FirebaseFirestore.getInstance()
         val auth = Firebase.auth
-        val currentUser = auth.currentUser
-        val userState = UserState()
-        userState.downloadUser(db, currentUser, this@MainActivity) // download user data and show it
+        val currentUser = auth.currentUser!!.email!!
+        val userState = UserState(db)
+        val mainViewState = MainViewState(this)
+        CoroutineScope(Dispatchers.Main).launch() {
+            val user = userState.downloadUser(
+                currentUser
+            )!!
+            mainViewState.updateState(user)
+        }
+
     }
 
 }

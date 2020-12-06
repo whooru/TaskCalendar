@@ -1,9 +1,7 @@
 package com.example.taskcalendar.activities
 
-import android.app.IntentService
-import android.content.Intent
+
 import android.os.Bundle
-import android.os.Handler
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -18,8 +16,6 @@ import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.android.synthetic.main.month_main.*
 import kotlinx.coroutines.*
 import org.threeten.bp.LocalDateTime
-import kotlin.coroutines.CoroutineContext
-import kotlin.coroutines.coroutineContext
 
 
 class CalendarActivity : AppCompatActivity() {
@@ -28,6 +24,10 @@ class CalendarActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.month_main)
+        val currentDate = LocalDateTime.now()
+        var currentYear = currentDate.year
+
+
         val user = intent.getSerializableExtra("user") as User
         val calendarName = intent.getStringExtra("calendar")!!
         var friend: Friend? = null
@@ -35,8 +35,7 @@ class CalendarActivity : AppCompatActivity() {
             friend = intent.getSerializableExtra("friend")!! as Friend
         }
 
-        val currentDate = LocalDateTime.now()
-        var currentYear = currentDate.year
+        //sort months list from user's calendar
         val sortedMonthList =
             generateData(user.calendarsList[calendarName]!!.yearsList[currentYear.toString()]!!.monthsList.values)
         val recyclerView = recycler_view
@@ -49,7 +48,12 @@ class CalendarActivity : AppCompatActivity() {
 
         recyclerView.layoutManager = layoutManager
         recyclerView.adapter = adapter
-        recyclerView.addItemDecoration(DividerItemDecoration(this, DividerItemDecoration.VERTICAL))
+        recyclerView.addItemDecoration(
+            DividerItemDecoration(
+                this,
+                DividerItemDecoration.VERTICAL
+            )
+        )
 
         //подгрузка следующего года, когда список подходит к концу
         recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
@@ -97,10 +101,7 @@ class CalendarActivity : AppCompatActivity() {
                     loading = true
                 }
             }
-
-
         })
-
     }
 
     private fun generateData(list: MutableCollection<CMonth>): MutableList<CMonth> {

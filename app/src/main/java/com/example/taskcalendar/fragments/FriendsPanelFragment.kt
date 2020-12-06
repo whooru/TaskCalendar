@@ -3,23 +3,19 @@ package com.example.taskcalendar.fragments
 import android.app.Dialog
 import android.content.ContentValues
 import android.content.Context
-import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
-import android.widget.ImageButton
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import com.example.taskcalendar.R
-import com.example.taskcalendar.activities.CalendarActivity
 import com.example.taskcalendar.objects.Friend
 import com.example.taskcalendar.objects.User
-import com.example.taskcalendar.veiwsstate.MainViewState
 import com.example.taskcalendar.veiwsstate.Parametres
-import com.google.android.gms.tasks.Tasks
+import com.example.taskcalendar.veiwsstate.UserState
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.DocumentChange
 import com.google.firebase.firestore.FirebaseFirestore
@@ -31,17 +27,17 @@ import kotlinx.android.synthetic.main.add_friend_popup.*
 import kotlinx.android.synthetic.main.create_calendar_fragment.*
 import kotlinx.android.synthetic.main.create_calendar_fragment.btn_cancel
 import kotlinx.android.synthetic.main.freinds_fragment.*
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
-import java.io.Serializable
+import kotlinx.android.synthetic.main.friend_calendars_list_popup.*
+import kotlinx.coroutines.*
 import java.util.*
 
 class FriendsPanelFragment() : Fragment() {
-    var usersFriendsList: MutableMap<String, Friend> = mutableMapOf()
-    var loginList: MutableMap<String, Any?> = mutableMapOf()
+    var loginList: MutableMap<String, String> = mutableMapOf()
     var user: User? = null
     var snapshot: ListenerRegistration? = null
+    private val db = FirebaseFirestore.getInstance()
+    private val userState = UserState(db)
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         retainInstance = true
@@ -52,53 +48,21 @@ class FriendsPanelFragment() : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        val db = FirebaseFirestore.getInstance()
-        val currentUser = Firebase.auth.currentUser!!.email
-        val docRef = db.collection("users").document(currentUser.toString())
-        runBlocking {
-            GlobalScope.launch {
-                Tasks.await(docRef.get()
-                    .addOnSuccessListener { document ->
-                        if (document != null) {
-                            val userdb = document.toObject(User::class.java)!!
-                            user = userdb
-                        } else {
-                            Log.d(ContentValues.TAG, "No such document")
-                        }
-                    }
-                    .addOnFailureListener { exception ->
-                        Log.d(ContentValues.TAG, "get failed with ", exception)
-                    })
-            }.join()
+        val currentUser = Firebase.auth.currentUser!!.email.toString()
+        CoroutineScope(Dispatchers.Main).launch {
+            user = userState.downloadUser(currentUser)
+            loginList = userState.downloadUsersLogin()
         }
-        val loginRef = db.collection("usersLogin")
-        runBlocking {
-            GlobalScope.launch {
-                Tasks.await(loginRef.get().addOnSuccessListener {
-                    documents ->
-                    if (documents !=null){
-                        for (document in documents){
-                            loginList[document.id] = document.data["email"]
-                        }
-                    }
-                })
-            }
-        }
-        return inflater.inflate(R.layout.freinds_fragment, container, false);
-
+        return inflater.inflate(R.layout.freinds_fragment, container, false)
     }
 
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-//        super.onViewCreated(view, savedInstanceState)
         add_friend.setOnClickListener {
-            addFriend(this.context!!)
+            addFriend(context!!)
         }
         val userAuth = Firebase.auth.currentUser!!.email
-        val db = FirebaseFirestore.getInstance()
         val pathFriends = db.collection("users").document(userAuth.toString()).collection("friends")
-        val pathForFriends = db.collection("usersLogin")
-
         snapshot = pathFriends.addSnapshotListener { snapshots, e ->
             if (e != null) {
                 Log.w(ContentValues.TAG, "listen:error", e)
@@ -107,24 +71,15 @@ class FriendsPanelFragment() : Fragment() {
             for (dc in snapshots!!.documentChanges) {
                 when (dc.type) {
                     DocumentChange.Type.ADDED -> {
-                        Log.d("FRIEND", "New Friend: ${dc.document.data}")
-                        val friendBtn = Button(activity)
-                        friendBtn.text = dc.document.id
-                        friendBtn.layoutParams = Parametres().getDayParams()
-                        friendBtn.width = 150
-                        friendBtn.height = 150
-                        friendBtn.setOnClickListener {
-                            //TODO
-
-                        }
+                        Log.d("FRIEND", "New Friend: ${dc.document.id}")
+                        val friendBtn = friendBtn(dc.document.id)
                         friends_list.addView(friendBtn)
                     }
                     DocumentChange.Type.MODIFIED -> {
-                        Log.d("FRIEND", "Modified friend: ${dc.document.data}")
+                        Log.d("FRIEND", "Modified friend: ${dc.document.id}")
                     }
                     DocumentChange.Type.REMOVED -> {
-                        Log.d("FRIEND", "Removed friend: ${dc.document.data}")
-
+                        Log.d("FRIEND", "Removed friend: ${dc.document.id}")
                     }
                 }
             }
@@ -137,6 +92,26 @@ class FriendsPanelFragment() : Fragment() {
         snapshot!!.remove()
     }
 
+    private suspend fun showFriendCalendars(friend: Friend): Dialog {
+        val dialog = Dialog(context!!)
+        dialog.setContentView(R.layout.friend_calendars_list_popup)
+        dialog.friendName.text = friend.login
+        val calendarList: MutableList<String> = userState.downloadCalendars(friend.email)
+        println(calendarList)
+        if (calendarList.isNotEmpty()) {
+            for (calendarName in calendarList) {
+                val calendar = Button(context)
+                calendar.text = calendarName
+                calendar.setOnClickListener {
+                    //TODO
+
+                    //snapshot!!.remove()
+                }
+                dialog.friend_calendars_list.addView(calendar)
+            }
+        }
+        return dialog
+    }
 
     private fun addFriend(context: Context) {
         val dialog = Dialog(context)
@@ -146,9 +121,9 @@ class FriendsPanelFragment() : Fragment() {
             val friendLogin = dialog.txt_friend_login.text.toString()
             if (user != null) {
                 if (loginList.containsKey(friendLogin)) {
-                    user?.addFriend(friendLogin)
+                    user?.addFriend(friendLogin, loginList[friendLogin].toString())
                     dialog.cancel()
-                }else{
+                } else {
                     Toast.makeText(
                         context, "User does not exist",
                         Toast.LENGTH_SHORT
@@ -159,6 +134,20 @@ class FriendsPanelFragment() : Fragment() {
         dialog.btn_cancel.setOnClickListener {
             dialog.cancel()
         }
+    }
+
+    private fun friendBtn(friendName: String): Button {
+        val friendBtn = Button(activity)
+        friendBtn.text = friendName
+        friendBtn.layoutParams = Parametres().getDayParams()
+        friendBtn.width = 150
+        friendBtn.height = 150
+        friendBtn.setOnClickListener {
+            CoroutineScope(Dispatchers.Main).launch {
+                showFriendCalendars(user!!.friendsList[friendName]!!).show()
+            }
+        }
+        return friendBtn
     }
 }
 

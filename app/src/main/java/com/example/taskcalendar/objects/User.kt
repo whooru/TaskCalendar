@@ -1,7 +1,10 @@
 package com.example.taskcalendar.objects
 
 
+import com.google.android.gms.tasks.Tasks
 import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import java.io.Serializable
 
 
@@ -26,22 +29,24 @@ data class User(
         updateDb()
     }
 
-    fun addFriend(friendsLogin: String){
+    fun addFriend(friendsLogin: String, friendsEmail: String) {
         val db = FirebaseFirestore.getInstance()
-        val friend = Friend(friendsLogin)
+        val friend = Friend(friendsLogin, friendsEmail)
         friendsList[friendsLogin] = friend
-        val path = db.collection("users").document(email).collection("friends").document(friendsLogin)
+        val path =
+            db.collection("users").document(email).collection("friends").document(friendsLogin)
         path.set(friend)
         updateDb()
     }
 
-    fun removeFriend(friendsEmail: String){
+    fun removeFriend(friendsEmail: String) {
         val db = FirebaseFirestore.getInstance()
-        val path = db.collection("users").document(email).collection("friends").document(friendsEmail)
+        val path =
+            db.collection("users").document(email).collection("friends").document(friendsEmail)
 
     }
 
-    fun updateDb(){
+    fun updateDb() {
         val db = FirebaseFirestore.getInstance()
         val path = db.collection("users").document(email)
         path.set(this)
