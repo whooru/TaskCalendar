@@ -2,6 +2,7 @@ package com.example.taskcalendar.veiwsstate
 
 
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.content.ContentValues
 import android.graphics.Color
 import android.util.Log
@@ -24,7 +25,7 @@ import org.threeten.bp.LocalDateTime
 import java.util.*
 
 
-class MonthViewHolder(val inflater: LayoutInflater, val parent: ViewGroup) :
+class MonthViewHolder(private val inflater: LayoutInflater, private val parent: ViewGroup) :
     RecyclerView.ViewHolder(inflater.inflate(R.layout.month_item, parent, false)) {
     private var mTitleView: TextView? = null
     private var mYearView: TextView? = null
@@ -45,6 +46,11 @@ class MonthViewHolder(val inflater: LayoutInflater, val parent: ViewGroup) :
         val todayData = LocalDateTime.now()
         mTitleView?.text = month!!.name
         thisMonth!!.removeAllViews()
+//        coroutineScope {
+//            launch(Dispatchers.Main) {
+//
+//            }
+//        }
         val firstDayOfMonth =
             todayData.withYear(month.year!!).withMonth(month.numberOfMonth!!)
                 .withDayOfMonth(1).dayOfWeek.value - 1

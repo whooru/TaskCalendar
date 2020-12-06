@@ -27,11 +27,7 @@ class MonthListAdapter(
     override fun onBindViewHolder(holder: MonthViewHolder, position: Int) {
         this.position = position
         val month = monthsList[position]
-        runBlocking {
-            launch {
-                holder.bind(month, user, calendarName, date)
-            }
-        }
+        holder.bind(month, user, calendarName, date)
     }
 
     override fun getItemCount() = monthsList.size

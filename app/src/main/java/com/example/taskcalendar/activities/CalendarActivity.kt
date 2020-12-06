@@ -27,36 +27,24 @@ class CalendarActivity : AppCompatActivity() {
         val currentDate = LocalDateTime.now()
         var currentYear = currentDate.year
 
-
         val user = intent.getSerializableExtra("user") as User
         val calendarName = intent.getStringExtra("calendar")!!
         var friend: Friend? = null
         if (intent.getSerializableExtra("friend") != null) {
             friend = intent.getSerializableExtra("friend")!! as Friend
         }
-
         //sort months list from user's calendar
         val sortedMonthList =
             generateData(user.calendarsList[calendarName]!!.yearsList[currentYear.toString()]!!.monthsList.values)
         val recyclerView = recycler_view
-        runBlocking {
-            launch {
-                adapter = MonthListAdapter(sortedMonthList, user, calendarName, currentDate)
-            }
-        }
+        adapter = MonthListAdapter(sortedMonthList, user, calendarName, currentDate)
         val layoutManager = LinearLayoutManager(this)
+        setOptionsForRecycler(recyclerView, layoutManager, adapter!!)
 
-        recyclerView.layoutManager = layoutManager
-        recyclerView.adapter = adapter
-        recyclerView.addItemDecoration(
-            DividerItemDecoration(
-                this,
-                DividerItemDecoration.VERTICAL
-            )
-        )
 
         //подгрузка следующего года, когда список подходит к концу
         recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+
             var previousTotal = 0
             var loading = true
             val visibleThreshold = 6
@@ -75,33 +63,48 @@ class CalendarActivity : AppCompatActivity() {
                     }
                 }
                 if (!loading && (totalItemCount - visibleItemCount) <= (firstVisibleItem + visibleThreshold)) {
-                    val initialSize = adapter!!.monthsList.size
-                    currentYear++
-                    val list = mutableListOf<CMonth>()
-                    var nextYear =
-                        user.calendarsList[calendarName]!!.yearsList[currentYear.toString()]
-                    if (nextYear != null) {
-                        list.addAll(nextYear.monthsList.values)
-                    } else {
-                        val path = FirebaseFirestore.getInstance().collection("users")
-                            .document(user.email)
-                            .collection("calendars").document(calendarName)
-                        user.calendarsList[calendarName]!!.addYear(
-                            path,
-                            Year(currentYear)
-                        )
-                        nextYear =
+                    CoroutineScope(Dispatchers.IO).launch {
+                        val initialSize = adapter!!.monthsList.size
+                        currentYear++
+                        val list = mutableListOf<CMonth>()
+                        var nextYear =
                             user.calendarsList[calendarName]!!.yearsList[currentYear.toString()]
-                        list.addAll(nextYear!!.monthsList.values)
-                    }
-                    val updatedSize = updateDataList(list)
-                    GlobalScope.launch(Dispatchers.IO) {
+                        if (nextYear != null) {
+                            list.addAll(nextYear.monthsList.values)
+                        } else {
+                            val path = FirebaseFirestore.getInstance().collection("users")
+                                .document(user.email)
+                                .collection("calendars").document(calendarName)
+                            user.calendarsList[calendarName]!!.addYear(
+                                path,
+                                Year(currentYear)
+                            )
+                            nextYear =
+                                user.calendarsList[calendarName]!!.yearsList[currentYear.toString()]
+                            list.addAll(nextYear!!.monthsList.values)
+                        }
+                        val updatedSize = updateDataList(list)
                         updateAdapter(recyclerView, initialSize, updatedSize)
                     }
                     loading = true
                 }
             }
         })
+    }
+
+    private fun setOptionsForRecycler(
+        recyclerView: RecyclerView,
+        layoutManager: LinearLayoutManager,
+        adapter: MonthListAdapter
+    ) {
+        recyclerView.layoutManager = layoutManager
+        recyclerView.adapter = adapter
+        recyclerView.addItemDecoration(
+            DividerItemDecoration(
+                this,
+                DividerItemDecoration.VERTICAL
+            )
+        )
     }
 
     private fun generateData(list: MutableCollection<CMonth>): MutableList<CMonth> {
@@ -120,13 +123,11 @@ class CalendarActivity : AppCompatActivity() {
     }
 
     fun updateAdapter(recyclerView: RecyclerView, initialSize: Int, updatedSize: Int) {
-        CoroutineScope(Dispatchers.Default).launch {
-            recyclerView.post {
-                adapter!!.notifyItemRangeInserted(
-                    initialSize,
-                    updatedSize
-                )
-            }
+        recyclerView.post {
+            adapter!!.notifyItemRangeInserted(
+                initialSize,
+                updatedSize
+            )
         }
     }
 }

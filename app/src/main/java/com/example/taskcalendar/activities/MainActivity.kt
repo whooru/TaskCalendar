@@ -24,7 +24,7 @@ class MainActivity : AppCompatActivity() {
         val currentUser = auth.currentUser!!.email!!
         val userState = UserState(db)
         val mainViewState = MainViewState(this)
-        CoroutineScope(Dispatchers.Main).launch() {
+        CoroutineScope(Dispatchers.Main).launch {
             val user = userState.downloadUser(
                 currentUser
             )!!
